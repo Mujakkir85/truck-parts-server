@@ -16,19 +16,19 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 
-
 async function run() {
 
     try {
         await client.connect();
         console.log("DataBase Connected!")
-        //const partsCollection = client.db('truck_parts').collection('parts')
+        const partsCollection = client.db('truck_parts').collection('parts')
         const usersCollection = client.db('truck_parts').collection('users')
 
         //make users
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
+            const username = req.body.username;
             //console.log(user);
             const filter = { email: email, username: username };
             const options = { upsert: true };
@@ -40,6 +40,24 @@ async function run() {
             res.send({ result, token });
 
         })
+
+        //get all parts show in home page
+        app.get('/parts', async (req, res) => {
+            const query = {};
+            const cursor = partsCollection.find(query);
+            const allparts = await cursor.toArray();
+            res.send(allparts)
+        })
+
+        //get single purchase details
+        app.get('/purchase/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) };
+            const result = await partsCollection.findOne(query);
+            res.send(result);
+        })
+
 
     }
     finally {
