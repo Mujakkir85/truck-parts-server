@@ -23,6 +23,7 @@ async function run() {
         console.log("DataBase Connected!")
         const partsCollection = client.db('truck_parts').collection('parts')
         const usersCollection = client.db('truck_parts').collection('users')
+        const ordersCollection = client.db('truck_parts').collection('orders')
 
         //make users
         app.put('/user/:email', async (req, res) => {
@@ -58,6 +59,13 @@ async function run() {
             res.send(result);
         })
 
+        //order product from purchaseparts page 
+
+        app.post('/orderparts', async (req, res) => {
+            const newOrder = req.body;
+            const result = await ordersCollection.insertOne(newOrder);
+            res.send(result);
+        })
 
     }
     finally {
