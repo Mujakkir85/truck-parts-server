@@ -77,7 +77,21 @@ async function run() {
             res.send(result);
         })
 
+        //load all user orders by email in Dashboard in Myorders page
 
+        app.get('/userOrders', verifyJWT, async (req, res) => {
+            const useremail = req.query.email;
+            const decodedEmail = req.decoded.email
+            if (useremail === decodedEmail) {
+                const query = { userEmail: useremail }
+                const userorders = await ordersCollection.find(query).toArray();
+                return res.send(userorders)
+            }
+            else {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+
+        })
 
 
 
