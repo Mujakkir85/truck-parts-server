@@ -94,20 +94,41 @@ async function run() {
         })
 
         //load single user for my profile
-        app.get('/singleuser', verifyJWT, async (req, res) => {
-            const useremail = req.query.email;
-            console.log(useremail);
-            const decodedEmail = req.decoded.email
-            if (useremail === decodedEmail) {
-                const query = { email: useremail }
-                const singleuser = await usersCollection.find(query).toArray();
-                return res.send(singleuser)
-            }
-            else {
-                return res.status(403).send({ message: 'forbidden access' });
-            }
+        /* app.get('/singleuser', verifyJWT, async (req, res) => {
+             const useremail = req.query.email;
+             // console.log(useremail);
+             const decodedEmail = req.decoded.email
+             if (useremail === decodedEmail) {
+                 const query = { email: useremail }
+                 const singleuser = await usersCollection.find(query).toArray();
+                 return res.send(singleuser)
+             }
+             else {
+                 return res.status(403).send({ message: 'forbidden access' });
+             }
+ 
+         })*/
 
+        // Update single user
+        app.put('/updateuser/:email', async (req, res) => {
+            const email = req.params.email
+            const updateUser = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    email: updateUser.email,
+                    username: updateUser.name,
+                    loaction: updateUser.loaction,
+                    phone: updateUser.phone
+                }
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
+
+
+
 
         //Load All reviews
 
