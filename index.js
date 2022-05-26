@@ -42,6 +42,7 @@ async function run() {
         const partsCollection = client.db('truck_parts').collection('parts')
         const usersCollection = client.db('truck_parts').collection('users')
         const ordersCollection = client.db('truck_parts').collection('orders')
+        const reviewsCollection = client.db('truck_parts').collection('reviews')
 
         //make users
         app.put('/user/:email', async (req, res) => {
@@ -93,6 +94,9 @@ async function run() {
 
         })
 
+        //Load All reviews
+
+
 
 
         //order product from purchaseparts page 
@@ -101,6 +105,22 @@ async function run() {
             const newOrder = req.body;
             const result = await ordersCollection.insertOne(newOrder);
             res.send(result);
+        })
+
+        //Delete Orders
+        app.delete('/myorders/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(filter);
+            res.send(result)
+        })
+
+        //Add Reviews
+
+        app.post('/addreview', verifyJWT, async (req, res) => {
+            const newReview = req.body;
+            const result = await reviewsCollection.insertOne(newReview)
+            res.send(result)
         })
 
     }
