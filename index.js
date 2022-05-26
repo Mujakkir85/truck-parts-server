@@ -96,7 +96,12 @@ async function run() {
 
         //Load All reviews
 
-
+        app.get('/showReview', async (req, res) => {
+            const query = {};
+            const cursor = reviewsCollection.find(query);
+            const allreviews = await cursor.toArray();
+            res.send(allreviews)
+        })
 
 
         //order product from purchaseparts page 
