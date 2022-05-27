@@ -44,6 +44,47 @@ async function run() {
         const ordersCollection = client.db('truck_parts').collection('orders')
         const reviewsCollection = client.db('truck_parts').collection('reviews')
 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await usersCollection.findOne({ email: requester });
+            // sercure admin page for not access by url
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                return res.status(403).send({ message: 'forbidden access' });
+            }
+
+        }
+
+        //for secure admin
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await usersCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin'; // get boolen value true or false
+            res.send({ admin: isAdmin })
+        })
+
+        //for make admin
+        app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        //verifyJWT to make user varified
+        app.get('/user', verifyJWT, async (req, res) => {
+            const users = await usersCollection.find().toArray();
+            res.send(users);
+        })
+
+
+
         //make users
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -68,6 +109,13 @@ async function run() {
             const allparts = await cursor.toArray();
             res.send(allparts)
         })
+
+        // app.get('/allparts', async (req, res) => {
+        //     const query = {};
+        //     const cursor = partsCollection.find(query);
+        //     const allparts = await cursor.toArray();
+        //     res.send(allparts)
+        // })
 
         //get single purchase details
         app.get('/purchase/:id', async (req, res) => {
@@ -156,11 +204,26 @@ async function run() {
             res.send(result)
         })
 
+        //Delete single products from all parts
+
+        app.delete('/singleproduct/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await partsCollection.deleteOne(filter);
+            res.send(result)
+        })
+
         //Add Reviews
 
         app.post('/addreview', verifyJWT, async (req, res) => {
             const newReview = req.body;
             const result = await reviewsCollection.insertOne(newReview)
+            res.send(result)
+        })
+
+        app.post('/addparts', verifyJWT, async (req, res) => {
+            const addparts = req.body;
+            const result = await partsCollection.insertOne(addparts)
             res.send(result)
         })
 
